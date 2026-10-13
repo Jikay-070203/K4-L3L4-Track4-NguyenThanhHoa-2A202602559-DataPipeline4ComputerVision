@@ -27,6 +27,11 @@ def check(level, name, detail=""):
 
 
 def sh(*cmd):
+    # Windows cannot execute the repository's Bash wrapper directly. Run the
+    # verify command through the same Docker invocation used by lab.sh.
+    if cmd[:2] == ("scripts/lab.sh", "verify"):
+        cmd = ("docker", "compose", "exec", "-T", "-w", "/opt/lab", "airflow",
+               "/home/airflow/lab-venv/bin/python", "-m", "pipeline.cli", "verify")
     return subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
 
 
@@ -47,7 +52,7 @@ def main():
     if "--save-verify" in sys.argv:
         r = sh("scripts/lab.sh", "verify")
         (ROOT / "report").mkdir(exist_ok=True)
-        (ROOT / "report" / "verify.txt").write_text(r.stdout + r.stderr)
+        (ROOT / "report" / "verify.txt").write_text(r.stdout + r.stderr, encoding="utf-8")
         print(r.stdout[-600:] or r.stderr[-600:])
         print("đã lưu report/verify.txt")
         return 0
@@ -64,7 +69,7 @@ def main():
     if not rp.exists():
         check("FAIL", "có REPORT.md")
     else:
-        t = rp.read_text()
+        t = rp.read_text(encoding="utf-8")
         f = report_fields(t)
         header = t.split("## Kết quả cuối")[0]
         check("PASS" if not PLACEHOLDER.search(header) and f["mssv"] else "FAIL", "thông tin cá nhân của REPORT.md đã điền (họ tên, MSSV, GitHub, trip)")
@@ -91,7 +96,7 @@ def main():
         if not p.exists():
             missing.append(name)
             continue
-        d = json.loads(p.read_text())
+        d = json.loads(p.read_text(encoding="utf-8"))
         if name == "run_summary":
             summary = d
         if f["mssv"] and d.get("student_id") != f["mssv"]:
@@ -110,7 +115,7 @@ def main():
     check("PASS" if not absent and len(have) >= 4 else "FAIL", "ảnh chụp: airflow_graph, minio_lake, metabase_dashboard và ít nhất 1 ảnh bài tập sập",
           ("thiếu: " + ", ".join(absent)) if absent else f"hiện có {len(have)} ảnh")
     v = ROOT / "report" / "verify.txt"
-    ok = v.exists() and "27/27 checks passed" in v.read_text()
+    ok = v.exists() and "27/27 checks passed" in v.read_text(encoding="utf-8")
     check("PASS" if ok else "FAIL", "report/verify.txt cho thấy 27/27 kiểm tra đạt", "chạy: python3 scripts/check_submission.py --save-verify" if not ok else "")
 
     # 5. git và repo công khai
