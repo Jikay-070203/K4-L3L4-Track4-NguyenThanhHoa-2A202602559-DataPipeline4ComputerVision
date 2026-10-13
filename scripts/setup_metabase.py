@@ -6,13 +6,16 @@
 Idempotent: if the dashboard exists it is left alone. Uses only the standard library.
 """
 import json
+import os
 import sys
 import time
 import urllib.error
 import urllib.request
 
 MB = "http://localhost:3000"
-USER = {"email": "lab@example.com", "password": "Day9-lab-pass!", "first_name": "Lab", "last_name": "User"}
+USER = {"email": os.getenv("MB_EMAIL", "lab@example.com"),
+        "password": os.getenv("MB_PASSWORD", "Day9-lab-pass!"),
+        "first_name": "Lab", "last_name": "User"}
 
 
 def call(method, path, body=None, token=None):
