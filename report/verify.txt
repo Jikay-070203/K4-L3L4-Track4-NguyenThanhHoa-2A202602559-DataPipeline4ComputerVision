@@ -1,0 +1,40 @@
+
+Module 1 Â· bronze
+  PASS  bronze raw_telemetry rows == CSV rows (drive_a)                          csv=3021
+  PASS  bronze raw_telemetry rows == CSV rows (drive_b)                          csv=3234
+  PASS  bronze keeps each video once (sha256 unique)                             2 rows
+  PASS  bronze video sha256 matches the original file                            
+  PASS  bronze trips == 26                                                       
+
+Module 2 Â· silver telemetry
+  PASS  quarantine counts match raw CSV (drive_a)                                expected={'duplicate': 20, 'speed_missing': 30, 'speed_out_of_range': 3} got={'duplicate': 20, 'speed_missing': 30, 'speed_out_of_range': 3}
+  PASS  clean + quarantined == received (drive_a)                                2968+53=3021
+  PASS  quarantine counts match raw CSV (drive_b)                                expected={'duplicate': 20, 'speed_missing': 30, 'speed_out_of_range': 3} got={'duplicate': 20, 'speed_missing': 30, 'speed_out_of_range': 3}
+  PASS  clean + quarantined == received (drive_b)                                3181+53=3234
+  PASS  no duplicate (drive, ts) in silver telemetry                             
+  PASS  all speeds in 0..70 m/s                                                  
+  PASS  drive B clock offset removed (first sample within 0.5 s of video start)  2025-10-08 14:30:00.009000+00:00
+
+Module 3 Â· silver frames
+  PASS  frame_id unique                                                          1246 frames
+  PASS  black frames detected (drive_a)                                          6/6
+  PASS  black frames detected (drive_b)                                          4/4
+  PASS  blurry frames detected (drive_a)                                         8/8
+  PASS  frozen camera = near-duplicate frames (drive_a)                          11/12
+  PASS  low-light frames flagged but not black (drive_b)                         10/10
+
+Module 4 Â· gold dataset
+  PASS  gold has frames in every split                                           1019 frames
+  PASS  no trip is in two splits (no leakage)                                    26 trips
+  PASS  every drive appears in train, val and test                               
+  PASS  gold contains no black / blurry / near-duplicate / out-of-sync frame     
+  PASS  one dataset_version, manifest.json agrees with the table                 version 15d3ffecad45
+  PASS  manifest lists upstream table versions (lineage)                         
+  PASS  every manifest image exists under the dataset version folder             
+
+Module 5 Â· warehouse
+  PASS  warehouse has the six marts                                              {'mart_trip_summary': 26, 'mart_telemetry_quality': 2, 'mart_split_balance': 3, 'mart_speed_coverage': 7, 'mart_frame_gallery': 1019, 'mart_frame_funnel': 2}
+  PASS  warehouse gallery rows == gold frames                                    
+
+27/27 checks passed
+{"ok": true}

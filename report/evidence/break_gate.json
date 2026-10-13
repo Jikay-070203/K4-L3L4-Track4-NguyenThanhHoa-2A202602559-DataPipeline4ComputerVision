@@ -1,0 +1,15 @@
+{
+  "experiment": "break_gate",
+  "student_id": "2A202602559",
+  "ran_at": "2026-10-13T02:46:58.006071+00:00",
+  "relaxed_max_speed_mps": 1000,
+  "gate_failed": true,
+  "failing_tests": [
+    {
+      "test": "in_range_silver_telemetry_speed_mps__70__0",
+      "rows": 6
+    }
+  ],
+  "summary_relaxed": "PASS=5 WARN=1 ERROR=1 SKIP=0",
+  "summary_restored": "PASS=6 WARN=1 ERROR=0 SKIP=0"
+}
